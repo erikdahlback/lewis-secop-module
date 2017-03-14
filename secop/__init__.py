@@ -16,7 +16,8 @@ class SecopDevice(Device):
     def __init__(self, host, port):
         super(SecopDevice, self).__init__()
 
-        self._sc = Client({'connectto': host, 'port': port})
+        self._sc = Client({'connectto': host, 'port': port}, autoconnect=False)
+        self._sc.startup(async=True)
         self.log.info('Modules: %s', self._sc.modules)
 
 

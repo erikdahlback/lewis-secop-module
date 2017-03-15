@@ -12,12 +12,11 @@ from secop.client.baseclient import Client
 framework_version = '1.0.2'
 
 
-def cmd_loop(lock, write_cache, fn):
+def cmd_loop(write_cache, fn):
     while True:
-        with lock:
-            while write_cache:
-                cmd = write_cache.pop(0)
-                fn(*cmd)
+        while write_cache:
+            cmd = write_cache.pop(0)
+            fn(*cmd)
         sleep(0.234)
 
 
@@ -30,10 +29,8 @@ class SecopDevice(Device):
         self.log.info('Modules: %s', self._sc.modules)
         self._write_cache = []
 
-        self._lock = threading.RLock()
-
-        self._thread = threading.Thread(target=cmd_loop, args=(
-            self._lock, self._write_cache, self._sc.setParameter))
+        self._thread = threading.Thread(target=cmd_loop,
+                                        args=(self._write_cache, self._sc.setParameter))
         self._thread.daemon = True
         self._thread.start()
 

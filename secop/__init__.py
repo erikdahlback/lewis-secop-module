@@ -1,5 +1,4 @@
 import threading
-from functools import partial
 from time import sleep
 
 from lewis.adapters.epics import EpicsAdapter, PV
@@ -57,8 +56,9 @@ class SecopEpicsInterface(EpicsAdapter):
         for module in self.device.modules:
             for param in self.device.get_parameters(module):
                 self.pvs[module + ':' + param] = PV(
-                    (partial(self.device.get_parameter, module, param),
-                     partial(self.device.set_parameter, module, param)))
+                    (lambda modu=module, par=param: self.device.get_parameter(modu, par),
+                     lambda value, modu=module, par=param: self.device.set_parameter(
+                         modu, par, value)))
 
         super(SecopEpicsInterface, self)._bind_device()
 

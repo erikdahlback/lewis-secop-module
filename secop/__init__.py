@@ -54,9 +54,9 @@ class SecopDevice(Device):
 
 class SecopEpicsInterface(EpicsAdapter):
     type_map = {
-        'str': 'string',
-        'float': 'float',
-        'int': 'int'
+        str: 'string',
+        float: 'float',
+        int: 'int'
     }
 
     def _bind_device(self):
@@ -65,12 +65,11 @@ class SecopEpicsInterface(EpicsAdapter):
         for module in self.device.modules:
             for param in self.device.get_parameters(module):
                 param_properties = self.device.get_properties(module, param)
-                print(param_properties)
                 param_type = self.type_map.get(param_properties['validator'], None)
 
                 if param_type is not None:
                     pv_name = module + ':' + param
-                    self.log.info('Generating PV %s of type %s', pv_name, param_type)
+                    self.log.debug('Generating PV %s of type %s', pv_name, param_type)
                     self.pvs[pv_name] = PV(
                         (lambda modu=module, par=param: self.device.get_parameter(modu, par),
                          lambda value, modu=module, par=param: self.device.set_parameter(

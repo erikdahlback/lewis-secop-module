@@ -48,17 +48,34 @@ class SecopDevice(Device):
     def set_parameter(self, module, param, value):
         self._write_cache.append((module, param, value))
 
+    def get_properties(self, module, param):
+        return self._sc.getProperties(module, param)
+
 
 class SecopEpicsInterface(EpicsAdapter):
+    type_map = {
+        'str': 'string',
+        'float': 'float',
+        'int': 'int'
+    }
+
     def _bind_device(self):
         self.pvs = {}
 
         for module in self.device.modules:
             for param in self.device.get_parameters(module):
-                self.pvs[module + ':' + param] = PV(
-                    (lambda modu=module, par=param: self.device.get_parameter(modu, par),
-                     lambda value, modu=module, par=param: self.device.set_parameter(
-                         modu, par, value)))
+                param_properties = self.device.get_properties(module, param)
+                param_type = self.type_map.get(param_properties['validator'], None)
+
+                if param_type is not None:
+                    self.pvs[module + ':' + param] = PV(
+                        (lambda modu=module, par=param: self.device.get_parameter(modu, par),
+                         lambda value, modu=module, par=param: self.device.set_parameter(
+                             modu, par, value)), type=param_type)
+                else:
+                    self.log.warn(
+                        'Param %s of module %s has type that can not be mapped to EPICS: %s',
+                        param, module, param_properties['validator'])
 
         super(SecopEpicsInterface, self)._bind_device()
 

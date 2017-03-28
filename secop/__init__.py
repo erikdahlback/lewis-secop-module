@@ -9,7 +9,7 @@ initLogging(rootlevel='debug')
 
 from secop.client.baseclient import Client
 
-framework_version = '1.0.2'
+framework_version = '1.0.3'
 
 
 def cmd_loop(write_cache, fn):

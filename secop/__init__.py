@@ -54,7 +54,7 @@ class SecopDevice(Device):
 
 class SecopEpicsInterface(EpicsAdapter):
     type_map = {
-        str: 'string',
+        str: 'char',
         float: 'float',
         int: 'int'
     }
@@ -73,7 +73,8 @@ class SecopEpicsInterface(EpicsAdapter):
                     self.pvs[pv_name] = PV(
                         (lambda modu=module, par=param: self.device.get_parameter(modu, par),
                          lambda value, modu=module, par=param: self.device.set_parameter(
-                             modu, par, value)), type=param_type)
+                             modu, par, value)), type=param_type,
+                        count=40 if param_type == 'char' else 1)
                 else:
                     self.log.warn(
                         'Param %s of module %s has type that can not be mapped to EPICS: %s',
